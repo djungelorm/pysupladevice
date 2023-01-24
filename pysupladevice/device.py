@@ -227,9 +227,7 @@ class Device(object):
         return self.BufferState.PACKET_AVAILABLE, expected_size
 
     def _handle_packet(self, data):
-        print('handle packet')
         packet_data = data[: -len(proto.TAG)]
-        print(packet_data)
         packet_data = packet_data.ljust(ctypes.sizeof(proto.TSuplaDataPacket), b"\x00")
         packet = proto.TSuplaDataPacket.from_buffer_copy(packet_data)
 

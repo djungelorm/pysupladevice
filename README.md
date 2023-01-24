@@ -1,11 +1,10 @@
 Python SUPLA device library
 ===========================
 
-A python library implementating of a subset of the features of a SUPLA device.
+A python library allowing you to write a script that acts as a SUPLA device, such as a sensor or a
+light switch.
 
-Allows you to write a python script that acts as a SUPLA device, such as a sensor or a light switch.
-
-Currently supports the following kinds of "channel":
+Currently supports the following kinds of channel:
  * Relay/switch
  * Temperature sensor
  * Humidity sensor

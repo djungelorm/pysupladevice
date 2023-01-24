@@ -2,6 +2,7 @@
 name = "pysupladevice"
 version = "0.1.0"
 description = ""
+license = "GPL-3.0-or-later"
 authors = ["djungelorm <djungelorm@users.noreply.github.com>"]
 readme = "README.md"
 

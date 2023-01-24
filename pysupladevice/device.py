@@ -103,10 +103,7 @@ class Device(object):
 
         self._recv_buffer += self._socket.read()
 
-        print('check for packet')
         state, packet_size = self._check_for_packet()
-        print(state)
-        print(self._recv_buffer)
         if state == self.BufferState.INVALID:
             raise network.NetworkError("Invalid data received")
         if state == self.BufferState.PACKET_AVAILABLE:

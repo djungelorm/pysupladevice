@@ -249,13 +249,12 @@ class Device(object):
             print(f"[{self._name}] <--- [{rr_id}] pong {msg.now.tv_sec},{msg.now.tv_usec}")
 
     def _handle_channel_new_value(self, rr_id, msg):
-        value = ctypes.c_uint64.from_buffer_copy(bytes(msg.value)).value
         if self._debug:
-            print(f"[{self._name}] <--- [{rr_id}] channel {msg.channel_number} new value of {value}")
+            print(f"[{self._name}] <--- [{rr_id}] channel {msg.channel_number} new value")
 
         success = False
         if msg.channel_number < len(self._channels):
-            success = self._channels[msg.channel_number].set_value(value)
+            success = self._channels[msg.channel_number].set_value(msg.value)
 
         # Note: this sends a SUPLA_DS_CALL_DEVICE_CHANNEL_VALUE_CHANGED_C packet followed
         # by a SUPLA_DS_CALL_CHANNEL_SET_VALUE_RESULT packet. This is swapped compared to
@@ -268,7 +267,7 @@ class Device(object):
             result.success = 1
 
         if self._debug:
-            print(f"[{self._name}] ---> [{self._rr_id}] channel set value result")
+            print(f"[{self._name}] ---> [{self._rr_id}] channel new value result")
         self._send_packet(proto.SUPLA_DS_CALL_CHANNEL_SET_VALUE_RESULT, bytes(result))
 
     def _set_value(self, channel_number, value):
@@ -277,7 +276,7 @@ class Device(object):
             msg.channel_number = channel_number
             msg.offline = 0
             msg.validity_time_sec = 0
-            msg.value[:] = value
+            msg.value = ctypes.c_uint64.from_buffer_copy(value)
             data = bytes(msg)
             if self._debug:
                 print(f"[{self._name}] ---> [{self._rr_id}] channel {channel_number} value changed")

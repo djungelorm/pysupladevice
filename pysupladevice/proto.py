@@ -19,7 +19,6 @@ SUPLA_DEVICE_NAME_MAXSIZE = 201
 SUPLA_EMAIL_MAXSIZE = 256
 SUPLA_AUTHKEY_SIZE = 16
 SUPLA_SOFTVER_MAXSIZE = 21
-SUPLA_CHANNELVALUE_SIZE = 8
 
 SUPLA_MAX_DATA_SIZE = 1248  # header + 32 channels x 21 bytes
 SUPLA_CHANNELMAXCOUNT = 32
@@ -114,12 +113,7 @@ class TDS_SuplaDeviceChannel_C(ctypes.Structure):
         ("action_trigger_caps", ctypes.c_uint32),
         ("default", ctypes.c_int32),
         ("flags", ctypes.c_int32),
-        ("active_trigger_properties", TActionTriggerProperties),
-        (
-            "padding",
-            ctypes.c_byte
-            * (SUPLA_CHANNELVALUE_SIZE - ctypes.sizeof(TActionTriggerProperties)),
-        ),
+        ("value", ctypes.c_uint64),
     ]
 
 
@@ -170,7 +164,7 @@ class TSD_SuplaChannelNewValue(ctypes.Structure):
         ("sender_id", ctypes.c_int32),
         ("channel_number", ctypes.c_byte),
         ("duration_ms", ctypes.c_uint32),
-        ("value", ctypes.c_byte * SUPLA_CHANNELVALUE_SIZE),
+        ("value", ctypes.c_uint64),
     ]
 
 
@@ -189,5 +183,5 @@ class TDS_SuplaDeviceChannelValue_C(ctypes.Structure):
         ("channel_number", ctypes.c_byte),
         ("offline", ctypes.c_byte),
         ("validity_time_sec", ctypes.c_uint32),
-        ("value", ctypes.c_byte * SUPLA_CHANNELVALUE_SIZE),
+        ("value", ctypes.c_uint64),
     ]

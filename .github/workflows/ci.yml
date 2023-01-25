@@ -20,6 +20,7 @@ jobs:
         python -m venv /opt/poetry
         /opt/poetry/bin/pip install poetry==1.2.0
         /opt/poetry/bin/poetry --version
+        /opt/poetry/bin/poetry install
     - name: Test
       run: |
         /opt/poetry/bin/poetry run pytest -v

@@ -21,6 +21,9 @@ jobs:
         /opt/poetry/bin/pip install poetry==1.2.0
         /opt/poetry/bin/poetry --version
         /opt/poetry/bin/poetry install
+    - name: Lint
+      run: |
+        /opt/poetry/bin/poetry run black --check pysupladevice tests
     - name: Test
       run: |
         /opt/poetry/bin/poetry run pytest -v

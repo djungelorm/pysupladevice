@@ -123,7 +123,9 @@ class Device(object):
         data = bytes(msg)[:size]
 
         if self._debug:
-            print(f"[{self._name}] ---> [{self._rr_id}] registering ({msg.channel_count} channels)")
+            print(
+                f"[{self._name}] ---> [{self._rr_id}] registering ({msg.channel_count} channels)"
+            )
         self._send_packet(proto.SUPLA_DS_CALL_REGISTER_DEVICE_E, data)
 
     def _send_ping(self):
@@ -133,7 +135,9 @@ class Device(object):
         msg.now.tv_usec = int((now - int(now)) * 1000000)
         data = bytes(msg)
         if self._debug:
-            print(f"[{self._name}] ---> [{self._rr_id}] ping {msg.now.tv_sec},{msg.now.tv_usec}")
+            print(
+                f"[{self._name}] ---> [{self._rr_id}] ping {msg.now.tv_sec},{msg.now.tv_usec}"
+            )
         self._send_packet(proto.SUPLA_DCS_CALL_PING_SERVER, data)
 
     def _send_packet(self, call_id, data):
@@ -229,18 +233,20 @@ class Device(object):
         if result_code != proto.SuplaResultCode.TRUE:
             raise DeviceError(f"Register failed: {result_code.name}")
         if self._debug:
-            print(
-                f"[{self._name}] <--- [{rr_id}] registered ok"
-            )
+            print(f"[{self._name}] <--- [{rr_id}] registered ok")
         self._state = self.State.CONNECTED
 
     def _handle_ping_server_result(self, rr_id, msg):
         if self._debug:
-            print(f"[{self._name}] <--- [{rr_id}] pong {msg.now.tv_sec},{msg.now.tv_usec}")
+            print(
+                f"[{self._name}] <--- [{rr_id}] pong {msg.now.tv_sec},{msg.now.tv_usec}"
+            )
 
     def _handle_channel_new_value(self, rr_id, msg):
         if self._debug:
-            print(f"[{self._name}] <--- [{rr_id}] channel {msg.channel_number} new value")
+            print(
+                f"[{self._name}] <--- [{rr_id}] channel {msg.channel_number} new value"
+            )
 
         success = False
         if msg.channel_number < len(self._channels):
@@ -271,5 +277,7 @@ class Device(object):
             msg.value = ctypes.c_uint64.from_buffer_copy(value)
             data = bytes(msg)
             if self._debug:
-                print(f"[{self._name}] ---> [{self._rr_id}] channel {channel_number} value changed")
+                print(
+                    f"[{self._name}] ---> [{self._rr_id}] channel {channel_number} value changed"
+                )
             self._send_packet(proto.SUPLA_DS_CALL_DEVICE_CHANNEL_VALUE_CHANGED_C, data)

@@ -63,6 +63,5 @@ class Socket(object):
         except ssl.SSLZeroReturnError as exn:
             raise NetworkError(str(exn))
 
-
     def write(self, data):
         self._socket.sendall(data)

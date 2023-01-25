@@ -9,8 +9,6 @@ SUPLA_DCS_CALL_PING_SERVER = 40
 SUPLA_SDC_CALL_PING_SERVER_RESULT = 50
 SUPLA_DS_CALL_REGISTER_DEVICE_E = 69
 SUPLA_SD_CALL_REGISTER_DEVICE_RESULT = 70
-SUPLA_DCS_CALL_SET_ACTIVITY_TIMEOUT = 210
-SUPLA_SDC_CALL_SET_ACTIVITY_TIMEOUT_RESULT = 220
 SUPLA_SD_CALL_CHANNEL_SET_VALUE = 110
 SUPLA_DS_CALL_CHANNEL_SET_VALUE_RESULT = 120
 SUPLA_DS_CALL_DEVICE_CHANNEL_VALUE_CHANGED_C = 103
@@ -149,22 +147,6 @@ class TSD_SuplaRegisterDeviceResult(ctypes.Structure):
         ("activity_timeout", ctypes.c_int8),
         ("version", ctypes.c_int8),
         ("version_min", ctypes.c_int8),
-    ]
-
-
-class TDCS_SuplaSetActivityTimeout(ctypes.Structure):
-    _pack_ = 1
-    _fields_ = [
-        ("activity_timeout", ctypes.c_uint8),
-    ]
-
-
-class TSDC_SuplaSetActivityTimeoutResult(ctypes.Structure):
-    _pack_ = 1
-    _fields_ = [
-        ("activity_timeout", ctypes.c_uint8),
-        ("min", ctypes.c_uint8),
-        ("max", ctypes.c_uint8),
     ]
 
 

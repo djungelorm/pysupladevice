@@ -26,7 +26,6 @@ class Device(object):
         version=None,
         port=2016,
         secure=True,
-        activity_timeout=None,
         debug=False,
     ):
         self._socket = network.Socket(server, port, secure)
@@ -49,8 +48,6 @@ class Device(object):
         self._update_channels = False
         # if no activity for this number of seconds, send a ping to the server
         self._ping_timeout = 15
-        self._activity_timeout = None
-        self._request_activity_timeout = activity_timeout
         self._last_activity = time.time()
 
     def add(self, channel):
@@ -83,14 +80,6 @@ class Device(object):
             return
 
         if self._state == self.State.CONNECTED:
-            if (
-                self._request_activity_timeout is not None
-                and self._activity_timeout != self._request_activity_timeout
-            ):
-                self._set_activity_timeout(self._request_activity_timeout)
-                self._request_activity_timeout = self._activity_timeout
-                return
-
             if self._update_channels:
                 for channel in self._channels:
                     channel._update()
@@ -140,15 +129,6 @@ class Device(object):
         if self._debug:
             print(f"[{self._name}] ---> [{self._rr_id}] registering ({msg.channel_count} channels)")
         self._send_packet(proto.SUPLA_DS_CALL_REGISTER_DEVICE_E, data)
-
-    def _set_activity_timeout(self, value):
-        msg = proto.TDCS_SuplaSetActivityTimeout()
-        msg.activity_timeout = value
-        data = bytes(msg)
-        if self._debug:
-            print(f"[{self._name}] ---> [{self._rr_id}] set activity timeout {value}s")
-        self._send_packet(proto.SUPLA_DCS_CALL_SET_ACTIVITY_TIMEOUT, data)
-        self._activity_timeout = value
 
     def _send_ping(self):
         msg = proto.TDCS_SuplaPingServer()
@@ -230,20 +210,10 @@ class Device(object):
         packet_data = data[: -len(proto.TAG)]
         packet_data = packet_data.ljust(ctypes.sizeof(proto.TSuplaDataPacket), b"\x00")
         packet = proto.TSuplaDataPacket.from_buffer_copy(packet_data)
-
-        if packet.tag != proto.TAG:
-            raise DeviceError("Received packet with invalid start tag")
-        if packet.version != proto.SUPLA_PROTO_VERSION:
-            raise DeviceError("Received packet with invalid protocol version")
-
         handlers = {
             proto.SUPLA_SD_CALL_REGISTER_DEVICE_RESULT: (
                 proto.TSD_SuplaRegisterDeviceResult,
                 self._handle_register_result,
-            ),
-            proto.SUPLA_SDC_CALL_SET_ACTIVITY_TIMEOUT_RESULT: (
-                proto.TSDC_SuplaSetActivityTimeoutResult,
-                self._handle_set_activity_timeout_result,
             ),
             proto.SUPLA_SDC_CALL_PING_SERVER_RESULT: (
                 proto.TSDC_SuplaPingServerResult,
@@ -269,17 +239,10 @@ class Device(object):
             raise DeviceError(f"Register failed: {result_code.name}")
         if self._debug:
             print(
-                f"[{self._name}] <--- [{rr_id}] registered ok, activity timeout "
-                f"{msg.activity_timeout}s"
+                f"[{self._name}] <--- [{rr_id}] registered ok"
             )
         self._state = self.State.CONNECTED
-        self._activity_timeout = msg.activity_timeout
         self._update_channels = True
-
-    def _handle_set_activity_timeout_result(self, rr_id, msg):
-        if self._debug:
-            print(f"[{self._name}] <--- [{rr_id}] set activity timeout " f"{msg.activity_timeout}s")
-        self._activity_timeout = msg.activity_timeout
 
     def _handle_ping_server_result(self, rr_id, msg):
         if self._debug:

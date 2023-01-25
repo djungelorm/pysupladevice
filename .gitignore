@@ -1,3 +1,5 @@
 htmlcov
 poetry.lock
 dist
+__pycache__
+.coverage

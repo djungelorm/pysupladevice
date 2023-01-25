@@ -13,7 +13,7 @@ class Channel(object):
 
     def _update(self):
         if self._device is not None:
-            self._device._set_value(self._channel_number, self._encode_value())
+            self._device._set_value(self._channel_number, self._encoded_value)
 
 
 class Relay(Channel):
@@ -59,8 +59,14 @@ class Relay(Channel):
             self._on_change(value)
         return True
 
-    def _encode_value(self):
+    @property
+    def _encoded_value(self):
         return bytes(ctypes.c_uint64(self._value))
+
+    def _set_encoded_value(self, value):
+        self._value = ctypes.c_uint64.from_buffer_copy(value).value
+        self._update()
+        return True
 
 
 class Temperature(Channel):
@@ -93,11 +99,19 @@ class Temperature(Channel):
         self._update()
         return True
 
-    def _encode_value(self):
+    @property
+    def _encoded_value(self):
         value = self._value
         if value is None:
             value = proto.SUPLA_TEMPERATURE_NOT_AVAILABLE
         return bytes(ctypes.c_double(value))
+
+    def _set_encoded_value(self, value):
+        self._value = ctypes.c_double.from_buffer_copy(value).value
+        if self._value == proto.SUPLA_TEMPERATURE_NOT_AVAILABLE:
+            self._value = None
+        self._update()
+        return True
 
 
 class Humidity(Channel):
@@ -130,7 +144,8 @@ class Humidity(Channel):
         self._update()
         return True
 
-    def _encode_value(self):
+    @property
+    def _encoded_value(self):
         value = self._value
         if value is None:
             value = proto.SUPLA_HUMIDITY_NOT_AVAILABLE
@@ -139,6 +154,13 @@ class Humidity(Channel):
         )
         humi_data = bytes(ctypes.c_int32(int(value * 1000)))
         return temp_data + humi_data
+
+    def _set_encoded_value(self, value):
+        self._value = ctypes.c_int32.from_buffer_copy(value[4:8]).value / 1000
+        if self._value == proto.SUPLA_HUMIDITY_NOT_AVAILABLE:
+            self._value = None
+        self._update()
+        return True
 
 
 class TemperatureAndHumidity(Channel):
@@ -179,7 +201,8 @@ class TemperatureAndHumidity(Channel):
         self._humidity = value
         return self._update()
 
-    def _encode_value(self):
+    @property
+    def _encoded_value(self):
         temp = self._temperature
         humi = self._humidity
         if temp is None:
@@ -189,3 +212,13 @@ class TemperatureAndHumidity(Channel):
         temp_data = bytes(ctypes.c_int32(int(temp * 1000)))
         humi_data = bytes(ctypes.c_int32(int(humi * 1000)))
         return temp_data + humi_data
+
+    def _set_encoded_value(self, value):
+        self._temperature = ctypes.c_int32.from_buffer_copy(value[0:4]).value / 1000
+        self._humidity = ctypes.c_int32.from_buffer_copy(value[4:8]).value / 1000
+        if self._temperature == proto.SUPLA_TEMPERATURE_NOT_AVAILABLE:
+            self._temperature = None
+        if self._humidity == proto.SUPLA_HUMIDITY_NOT_AVAILABLE:
+            self._humidity = None
+        self._update()
+        return True

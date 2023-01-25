@@ -113,7 +113,9 @@ class Device(object):
             msg.channels[number].action_trigger_caps = channel.action_trigger_caps
             msg.channels[number].default = channel.default
             msg.channels[number].flags = channel.flags
-            msg.channels[number].value = ctypes.c_uint64.from_buffer_copy(channel._encode_value())
+            msg.channels[number].value = ctypes.c_uint64.from_buffer_copy(
+                channel._encoded_value
+            )
         size = ctypes.sizeof(msg) - (
             (proto.SUPLA_CHANNELMAXCOUNT - msg.channel_count)
             * ctypes.sizeof(proto.TDS_SuplaDeviceChannel_C)
@@ -242,7 +244,9 @@ class Device(object):
 
         success = False
         if msg.channel_number < len(self._channels):
-            success = self._channels[msg.channel_number].set_value(msg.value)
+            success = self._channels[msg.channel_number]._set_encoded_value(
+                bytes(ctypes.c_uint64(msg.value))
+            )
 
         # Note: this sends a SUPLA_DS_CALL_DEVICE_CHANNEL_VALUE_CHANGED_C packet followed
         # by a SUPLA_DS_CALL_CHANNEL_SET_VALUE_RESULT packet. This is swapped compared to

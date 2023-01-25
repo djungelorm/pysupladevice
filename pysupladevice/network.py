@@ -4,7 +4,6 @@ import select
 
 
 def connect_secure(address, port):
-    print(f"Connecting to {address}:{port} (secure)")
     context = ssl.create_default_context()
     context.check_hostname = False
     context.verify_mode = ssl.VerifyMode.CERT_NONE
@@ -15,7 +14,6 @@ def connect_secure(address, port):
 
 
 def connect(address, port):
-    print(f"Connecting to {address}:{port} (insecure)")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(0.1)
     sock.connect((address, port))

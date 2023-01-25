@@ -34,28 +34,21 @@ class Socket(object):
 
     def read(self):
         try:
-            if len(self._buffer) == 0:
-                sockets = [self._socket]
-                ready_to_read, ready_to_write, in_error = select.select(
-                    sockets, sockets, sockets, 0.1
-                )
-                if len(ready_to_read) > 0:
-                    data = self._socket.recv(2048)
-                    if len(data) == 0:
-                        raise NetworkError("No data, connection reset by peer?")
-                    self._buffer += data
+            sockets = [self._socket]
+            ready_to_read, ready_to_write, in_error = select.select(
+                sockets, sockets, sockets, 0.1
+            )
+            if len(ready_to_read) > 0:
+                data = self._socket.recv(2048)
+                if len(data) == 0:
+                    raise NetworkError("No data, connection reset by peer?")
+                self._buffer += data
 
-            if len(self._buffer) > 0:
-                # only return some of the data at a time, to test partial data receipt
-                MAXLEN = 1024
-                result = self._buffer[:MAXLEN]
-                self._buffer = self._buffer[MAXLEN:]
-                return result
-            else:
-                return b""
+            result = self._buffer
+            self._buffer = b""
+            return result
         except BrokenPipeError as exn:
             raise NetworkError(str(exn))
-            reconnect = True
         except ConnectionResetError as exn:
             raise NetworkError(str(exn))
         except ssl.SSLZeroReturnError as exn:

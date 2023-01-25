@@ -147,7 +147,7 @@ class Device(object):
         packet.rr_id = self._rr_id
         packet.call_id = call_id
         packet.data_size = len(data)
-        packet.data[:] = data.ljust(proto.SUPLA_MAX_DATA_SIZE, b"\x00")
+        packet.data[:] = data.ljust(ctypes.sizeof(packet.data), b"\x00")
 
         packet_size = (
             ctypes.sizeof(proto.TSuplaDataPacket)
@@ -166,11 +166,12 @@ class Device(object):
         #    return PACKET_AVAILABLE and its size
         #  - if there is a valid partial packet at the start of the buffer return INCOMPLETE
         size = len(self._recv_buffer)
+        packet_header_size = ctypes.sizeof(proto.TSuplaDataPacket) - (
+            ctypes.sizeof(proto.TDS_SuplaDeviceChannel_C) * proto.SUPLA_CHANNELMAXCOUNT
+        )
 
         # check we have enough bytes for a minimally sized packet, followed by end tag
-        if size < ctypes.sizeof(
-            proto.TSuplaDataPacket
-        ) - proto.SUPLA_MAX_DATA_SIZE + len(proto.TAG):
+        if size < packet_header_size + len(proto.TAG):
             return self.BufferState.INCOMPLETE, 0
 
         # check we have correct start tag
@@ -187,12 +188,7 @@ class Device(object):
             return self.BufferState.INVALID, 0
 
         # check size matches with data size
-        expected_size = (
-            ctypes.sizeof(proto.TSuplaDataPacket)
-            - proto.SUPLA_MAX_DATA_SIZE
-            + packet.data_size
-            + len(proto.TAG)
-        )
+        expected_size = packet_header_size + packet.data_size + len(proto.TAG)
         if size < expected_size:
             return self.BufferState.INCOMPLETE, 0
 

@@ -1,6 +1,8 @@
 import ctypes
 from enum import Enum
 
+SUPLA_CHANNELMAXCOUNT = 32
+
 TAG = b"SUPLA"
 
 SUPLA_PROTO_VERSION = 16
@@ -19,9 +21,6 @@ SUPLA_DEVICE_NAME_MAXSIZE = 201
 SUPLA_EMAIL_MAXSIZE = 256
 SUPLA_AUTHKEY_SIZE = 16
 SUPLA_SOFTVER_MAXSIZE = 21
-
-SUPLA_MAX_DATA_SIZE = 1248  # header + 32 channels x 21 bytes
-SUPLA_CHANNELMAXCOUNT = 32
 
 SUPLA_CHANNELTYPE_RELAY = 2900
 SUPLA_CHANNELTYPE_THERMOMETER = 3034
@@ -45,6 +44,7 @@ SUPLA_ACTION_CAP_TOGGLE_x2 = 0x8
 SUPLA_ACTION_CAP_TOGGLE_x3 = 0x10
 SUPLA_ACTION_CAP_TOGGLE_x4 = 0x20
 SUPLA_ACTION_CAP_TOGGLE_x5 = 0x40
+
 
 class SuplaResultCode(Enum):
     NONE = 0
@@ -75,18 +75,6 @@ class SuplaResultCode(Enum):
     DENY_CHANNEL_HAS_SCHEDULE = 28
     DENY_CHANNEL_IS_ASSOCIETED_WITH_SCENE = 29
     DENY_CHANNEL_IS_ASSOCIETED_WITH_ACTION_TRIGGER = 30
-
-
-class TSuplaDataPacket(ctypes.Structure):
-    _pack_ = 1
-    _fields_ = [
-        ("tag", ctypes.c_char * len(TAG)),
-        ("version", ctypes.c_uint8),
-        ("rr_id", ctypes.c_uint32),
-        ("call_id", ctypes.c_uint32),
-        ("data_size", ctypes.c_uint32),
-        ("data", ctypes.c_byte * SUPLA_MAX_DATA_SIZE),
-    ]
 
 
 class SuplaTimeVal(ctypes.Structure):
@@ -184,4 +172,20 @@ class TDS_SuplaDeviceChannelValue_C(ctypes.Structure):
         ("offline", ctypes.c_byte),
         ("validity_time_sec", ctypes.c_uint32),
         ("value", ctypes.c_uint64),
+    ]
+
+
+class TSuplaDataPacket(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+        ("tag", ctypes.c_char * len(TAG)),
+        ("version", ctypes.c_uint8),
+        ("rr_id", ctypes.c_uint32),
+        ("call_id", ctypes.c_uint32),
+        ("data_size", ctypes.c_uint32),
+        (
+            "data",
+            ctypes.c_byte
+            * (ctypes.sizeof(TDS_SuplaDeviceChannel_C) * SUPLA_CHANNELMAXCOUNT),
+        ),
     ]

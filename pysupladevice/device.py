@@ -44,11 +44,8 @@ class Device(object):
         self._rr_id = 1
         self._recv_buffer = b""
 
-        # whether channel values should be sent to the server
-        self._update_channels = False
-        # if no activity for this number of seconds, send a ping to the server
         self._ping_timeout = 15
-        self._last_activity = time.time()
+        self._last_ping = 0
 
     def add(self, channel):
         channel_number = len(self._channels)
@@ -80,14 +77,10 @@ class Device(object):
             return
 
         if self._state == self.State.CONNECTED:
-            if self._update_channels:
-                for channel in self._channels:
-                    channel._update()
-                self._update_channels = False
-                return
-
-            if time.time() - self._last_activity > self._ping_timeout:
+            now = time.time()
+            if now - self._last_ping > self._ping_timeout:
                 self._send_ping()
+                self._last_ping = now
                 return
 
         self._recv_buffer += self._socket.read()
@@ -120,6 +113,7 @@ class Device(object):
             msg.channels[number].action_trigger_caps = channel.action_trigger_caps
             msg.channels[number].default = channel.default
             msg.channels[number].flags = channel.flags
+            msg.channels[number].value = ctypes.c_uint64.from_buffer_copy(channel._encode_value())
         size = ctypes.sizeof(msg) - (
             (proto.SUPLA_CHANNELMAXCOUNT - msg.channel_count)
             * ctypes.sizeof(proto.TDS_SuplaDeviceChannel_C)
@@ -158,7 +152,6 @@ class Device(object):
 
         self._socket.write(packet_data)
         self._rr_id += 1
-        self._last_activity = time.time()
 
     def _check_for_packet(self):
         #  - return INVALID if there is invalid data in the buffer
@@ -238,7 +231,6 @@ class Device(object):
                 f"[{self._name}] <--- [{rr_id}] registered ok"
             )
         self._state = self.State.CONNECTED
-        self._update_channels = True
 
     def _handle_ping_server_result(self, rr_id, msg):
         if self._debug:

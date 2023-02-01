@@ -28,6 +28,7 @@ class Device(object):
         secure=True,
         debug=False,
     ):
+        self._start_time = time.time()
         self._socket = network.Socket(server, port, secure)
         self._server = server
         self._port = port
@@ -210,6 +211,10 @@ class Device(object):
                 proto.TSD_SuplaRegisterDeviceResult,
                 self._handle_register_result,
             ),
+            proto.SUPLA_CSD_CALL_GET_CHANNEL_STATE: (
+                proto.TCSD_ChannelStateRequest,
+                self._handle_channel_state_request,
+            ),
             proto.SUPLA_SDC_CALL_PING_SERVER_RESULT: (
                 proto.TSDC_SuplaPingServerResult,
                 self._handle_ping_server_result,
@@ -235,6 +240,41 @@ class Device(object):
         if self._debug:
             print(f"[{self._name}] <--- [{rr_id}] registered ok")
         self._state = self.State.CONNECTED
+
+    def _handle_channel_state_request(self, rr_id, msg):
+        if self._debug:
+            print(f"[{self._name}] <--- [{self._rr_id}] channel state request")
+
+        now = time.time()
+
+        result = proto.TDSC_ChannelState()
+        result.receiver_id = msg.sender_id
+        result.channel_number = msg.channel_number
+        result.padding[:] = b"\x00\x00\x00"
+        result.fields = (
+            proto.SUPLA_CHANNELSTATE_FIELD_UPTIME
+            | proto.SUPLA_CHANNELSTATE_FIELD_CONNECTIONUPTIME
+        )
+        result.default_icon_field = 0
+        result.ipv4 = 0
+        result.mac[:] = b"\x00\x00\x00\x00\x00\x00"
+        result.battery_level = 0
+        result.battery_powered = 0
+        result.wifi_rssi = 0
+        result.wifi_signal_strength = 0
+        result.bridge_node_online = 0
+        result.bridge_node_signal_strength = 0
+        result.uptime = int(now - self._start_time)
+        result.connected_uptime = int(now - self._socket.connect_time)
+        result.battery_health = 0
+        result.last_connection_reset_cause = 0
+        result.light_source_lifespan = 0
+        result.light_source_operating_time = 0
+        result.empty[:] = b"\x00\x00"
+
+        if self._debug:
+            print(f"[{self._name}] ---> [{self._rr_id}] channel state result")
+        self._send_packet(proto.SUPLA_DSC_CALL_CHANNEL_STATE_RESULT, bytes(result))
 
     def _handle_ping_server_result(self, rr_id, msg):
         if self._debug:

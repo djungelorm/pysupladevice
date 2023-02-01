@@ -1,6 +1,7 @@
 import ssl
 import socket
 import select
+import time
 
 
 def connect_secure(address, port):
@@ -31,6 +32,11 @@ class Socket(object):
         else:
             self._socket = connect(server, port)
         self._buffer = b""
+        self._connect_time = time.time()
+
+    @property
+    def connect_time(self):
+        return self._connect_time
 
     def read(self):
         try:

@@ -14,6 +14,8 @@ SUPLA_SD_CALL_REGISTER_DEVICE_RESULT = 70
 SUPLA_SD_CALL_CHANNEL_SET_VALUE = 110
 SUPLA_DS_CALL_CHANNEL_SET_VALUE_RESULT = 120
 SUPLA_DS_CALL_DEVICE_CHANNEL_VALUE_CHANGED_C = 103
+SUPLA_CSD_CALL_GET_CHANNEL_STATE = 500
+SUPLA_DSC_CALL_CHANNEL_STATE_RESULT = 510
 
 SUPLA_GUID_SIZE = 16
 SUPLA_SERVER_NAME_MAXSIZE = 65
@@ -21,6 +23,9 @@ SUPLA_DEVICE_NAME_MAXSIZE = 201
 SUPLA_EMAIL_MAXSIZE = 256
 SUPLA_AUTHKEY_SIZE = 16
 SUPLA_SOFTVER_MAXSIZE = 21
+
+SUPLA_CHANNELSTATE_FIELD_UPTIME = 0x0080
+SUPLA_CHANNELSTATE_FIELD_CONNECTIONUPTIME = 0x0100
 
 SUPLA_CHANNELTYPE_RELAY = 2900
 SUPLA_CHANNELTYPE_THERMOMETER = 3034
@@ -129,6 +134,41 @@ class TSD_SuplaRegisterDeviceResult(ctypes.Structure):
         ("activity_timeout", ctypes.c_int8),
         ("version", ctypes.c_int8),
         ("version_min", ctypes.c_int8),
+    ]
+
+
+class TCSD_ChannelStateRequest(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+        ("sender_id", ctypes.c_int32),
+        ("channel_number", ctypes.c_byte),
+        ("padding", ctypes.c_byte * 3),
+    ]
+
+
+class TDSC_ChannelState(ctypes.Structure):
+    _pack_ = 1
+    _fields_ = [
+        ("receiver_id", ctypes.c_int32),
+        ("channel_number", ctypes.c_byte),
+        ("padding", ctypes.c_byte * 3),
+        ("fields", ctypes.c_int32),
+        ("default_icon_field", ctypes.c_int32),
+        ("ipv4", ctypes.c_int32),
+        ("mac", ctypes.c_byte * 6),
+        ("battery_level", ctypes.c_byte),
+        ("battery_powered", ctypes.c_byte),
+        ("wifi_rssi", ctypes.c_byte),
+        ("wifi_signal_strength", ctypes.c_byte),
+        ("bridge_node_online", ctypes.c_byte),
+        ("bridge_node_signal_strength", ctypes.c_byte),
+        ("uptime", ctypes.c_int32),
+        ("connected_uptime", ctypes.c_int32),
+        ("battery_health", ctypes.c_byte),
+        ("last_connection_reset_cause", ctypes.c_byte),
+        ("light_source_lifespan", ctypes.c_int16),
+        ("light_source_operating_time", ctypes.c_int32),
+        ("empty", ctypes.c_byte * 2),
     ]
 
 

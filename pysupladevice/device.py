@@ -53,6 +53,10 @@ class Device(object):
         self._channels.append(channel)
         channel.set_device(self, channel_number)
 
+    def connect(self):
+        while self._state != self.State.CONNECTED:
+            self.loop()
+
     def loop_forever(self):
         while True:
             self.loop()

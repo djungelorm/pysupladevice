@@ -17,7 +17,7 @@ class Channel(object):
 
 
 class Relay(Channel):
-    def __init__(self, default=0, on_change=None):
+    def __init__(self, default=False, on_change=None):
         super().__init__()
         self._default = default
         self._value = default
@@ -51,12 +51,15 @@ class Relay(Channel):
     def flags(self):
         return proto.SUPLA_CHANNEL_FLAG_CHANNELSTATE
 
-    def set_value(self, value):
-        changed = self._value != value
+    def do_set_value(self, value):
         self._value = value
         self._update()
-        if self._on_change is not None and changed:
-            self._on_change(value)
+
+    def set_value(self, value):
+        if self._on_change is None:
+            self.do_set_value(value)
+        else:
+            self._on_change(self, value)
         return True
 
     @property
@@ -64,9 +67,11 @@ class Relay(Channel):
         return bytes(ctypes.c_uint64(self._value))
 
     def _set_encoded_value(self, value):
-        self._value = ctypes.c_uint64.from_buffer_copy(value).value
-        self._update()
-        return True
+        if ctypes.c_uint64.from_buffer_copy(value).value == 1:
+            decoded_value = True
+        else:
+            decoded_value = False
+        return self.set_value(decoded_value)
 
 
 class Temperature(Channel):

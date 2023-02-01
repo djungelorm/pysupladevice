@@ -51,18 +51,25 @@ def test_relay():
 def test_relay_on_change():
     changes = []
 
-    def on_change(value):
+    def on_change(self, value):
         changes.append(value)
+        self.do_set_value(value)
 
     channel = channels.Relay(on_change=on_change)
     channel.set_value(True)
+    assert channel.value
     channel.set_value(True)
+    assert channel.value
     channel.set_value(False)
+    assert not channel.value
     channel.set_value(True)
+    assert channel.value
     channel.set_value(False)
+    assert not channel.value
     channel.set_value(False)
+    assert not channel.value
 
-    assert changes == [True, False, True, False]
+    assert changes == [True, True, False, True, False, False]
 
 
 def test_temperature():

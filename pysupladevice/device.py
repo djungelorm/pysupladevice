@@ -1,9 +1,8 @@
-from enum import Enum
 import ctypes
 import time
-from . import proto
-from . import channels
-from . import network
+from enum import Enum
+
+from . import channels, network, proto
 
 
 class DeviceError(Exception):

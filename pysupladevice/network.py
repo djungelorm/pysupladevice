@@ -1,6 +1,6 @@
-import ssl
-import socket
 import select
+import socket
+import ssl
 import time
 
 

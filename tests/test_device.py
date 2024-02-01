@@ -1,6 +1,7 @@
 import pytest
-from pysupladevice.device import Device
+
 from pysupladevice.channels import Temperature
+from pysupladevice.device import Device
 
 
 @pytest.fixture

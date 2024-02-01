@@ -1,5 +1,6 @@
-from pysupladevice import channels, proto
 from unittest.mock import Mock
+
+from pysupladevice import channels, proto
 
 
 def test_device_set_value():

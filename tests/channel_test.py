@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from pysupladevice import channels, proto
 
 
-def test_device_set_value():
+def test_device_set_value() -> None:
     device = Mock(["set_value"])
 
     channel = channels.Temperature()
@@ -14,7 +14,7 @@ def test_device_set_value():
     device.set_value.assert_called_with(0, b"\x00\x00\x00\x00\x00\x30\x71\xc0")
 
 
-def test_relay():
+def test_relay() -> None:
     channel = channels.Relay()
     assert not channel.value
     channel.set_value(False)
@@ -49,10 +49,10 @@ def test_relay():
     assert channel.encoded_value == b"\x01\x00\x00\x00\x00\x00\x00\x00"
 
 
-def test_relay_on_change():
+def test_relay_on_change() -> None:
     changes = []
 
-    def on_change(self, value):
+    def on_change(self: channels.Relay, value: bool) -> None:
         changes.append(value)
         self.do_set_value(value)
 
@@ -73,7 +73,7 @@ def test_relay_on_change():
     assert changes == [True, True, False, True, False, False]
 
 
-def test_temperature():
+def test_temperature() -> None:
     channel = channels.Temperature()
     channel.set_value(21)
     assert channel.value == 21
@@ -90,13 +90,13 @@ def test_temperature():
     assert channel.encoded_value == b"\x00\x00\x00\x00\x00\x00\x45\x40"
 
 
-def test_temperature_not_available():
+def test_temperature_not_available() -> None:
     channel = channels.Temperature()
     assert channel.value is None
     assert channel.encoded_value == b"\x00\x00\x00\x00\x00\x30\x71\xc0"
 
 
-def test_humidity():
+def test_humidity() -> None:
     channel = channels.Humidity()
     channel.set_value(57)
     assert channel.value == 57
@@ -113,13 +113,13 @@ def test_humidity():
     assert channel.encoded_value == b"\xc8\xcd\xfb\xff\x10\xa4\x00\x00"
 
 
-def test_humidity_not_available():
+def test_humidity_not_available() -> None:
     channel = channels.Humidity()
     assert channel.value is None
     assert channel.encoded_value == b"\xc8\xcd\xfb\xff\x18\xfc\xff\xff"
 
 
-def test_temperature_and_humidity():
+def test_temperature_and_humidity() -> None:
     channel = channels.TemperatureAndHumidity()
     channel.set_temperature(21)
     channel.set_humidity(57)
@@ -139,7 +139,7 @@ def test_temperature_and_humidity():
     assert channel.encoded_value == b"\x10\xa4\x00\x00\x90_\x01\x00"
 
 
-def test_temperature_and_humidity_not_available():
+def test_temperature_and_humidity_not_available() -> None:
     channel = channels.TemperatureAndHumidity()
     assert channel.temperature is None
     assert channel.humidity is None

@@ -1,43 +1,45 @@
 import ctypes
 
-from . import proto
+from pysupladevice import proto
+from pysupladevice.device import Device
 
 
 class Channel:  # pylint: disable=too-few-public-methods
-    def __init__(self):
-        self._device = None
-        self._channel_number = None
+    def __init__(self) -> None:
+        self._device: Device | None = None
+        self._channel_number: int | None = None
 
-    def set_device(self, device, channel_number):
+    def set_device(self, device: Device, channel_number: int) -> None:
         self._device = device
         self._channel_number = channel_number
 
-    def update(self):
+    def update(self) -> None:
         if self._device is not None:
+            assert self._channel_number is not None
             self._device.set_value(self._channel_number, self.encoded_value)
 
     @property
-    def encoded_value(self):
+    def encoded_value(self) -> bytes:
         raise NotImplementedError
 
 
 class Relay(Channel):
-    def __init__(self, default=False, on_change=None):
+    def __init__(self, default: bool = False, on_change=None):
         super().__init__()
         self._default = default
         self._value = default
         self._on_change = on_change
 
     @property
-    def value(self):
+    def value(self) -> bool:
         return self._value
 
     @property
-    def type(self):
+    def type(self) -> int:
         return proto.SUPLA_CHANNELTYPE_RELAY
 
     @property
-    def action_trigger_caps(self):
+    def action_trigger_caps(self) -> int:
         return (
             proto.SUPLA_ACTION_CAP_TURN_ON
             | proto.SUPLA_ACTION_CAP_TURN_OFF
@@ -49,18 +51,18 @@ class Relay(Channel):
         )
 
     @property
-    def default(self):
+    def default(self) -> bool:
         return self._default
 
     @property
-    def flags(self):
+    def flags(self) -> int:
         return proto.SUPLA_CHANNEL_FLAG_CHANNELSTATE
 
-    def do_set_value(self, value):
+    def do_set_value(self, value: bool) -> None:
         self._value = value
         self.update()
 
-    def set_value(self, value):
+    def set_value(self, value: bool) -> bool:
         if self._on_change is None:
             self.do_set_value(value)
         else:
@@ -68,52 +70,53 @@ class Relay(Channel):
         return True
 
     @property
-    def encoded_value(self):
+    def encoded_value(self) -> bytes:
         return bytes(ctypes.c_uint64(self._value))
 
-    def set_encoded_value(self, value):
+    def set_encoded_value(self, value: bytes) -> bool:
         decoded_value = bool(ctypes.c_uint64.from_buffer_copy(value).value)
         return self.set_value(decoded_value)
 
 
 class Temperature(Channel):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._value = None
+        self._value: float | None = None
 
     @property
-    def value(self):
+    def value(self) -> float:
+        assert self._value is not None
         return self._value
 
     @property
-    def type(self):
+    def type(self) -> int:
         return proto.SUPLA_CHANNELTYPE_THERMOMETER
 
     @property
-    def action_trigger_caps(self):
+    def action_trigger_caps(self) -> int:
         return 0
 
     @property
-    def default(self):
+    def default(self) -> int:
         return proto.SUPLA_CHANNELFNC_THERMOMETER
 
     @property
-    def flags(self):
+    def flags(self) -> int:
         return 0
 
-    def set_value(self, value):
+    def set_value(self, value: float) -> bool:
         self._value = value
         self.update()
         return True
 
     @property
-    def encoded_value(self):
+    def encoded_value(self) -> bytes:
         value = self._value
         if value is None:
             value = proto.SUPLA_TEMPERATURE_NOT_AVAILABLE
         return bytes(ctypes.c_double(value))
 
-    def set_encoded_value(self, value):
+    def set_encoded_value(self, value: bytes) -> bool:
         self._value = ctypes.c_double.from_buffer_copy(value).value
         if self._value == proto.SUPLA_TEMPERATURE_NOT_AVAILABLE:
             self._value = None
@@ -122,37 +125,38 @@ class Temperature(Channel):
 
 
 class Humidity(Channel):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._value = None
+        self._value: float | None = None
 
     @property
-    def value(self):
+    def value(self) -> float:
+        assert self._value is not None
         return self._value
 
     @property
-    def type(self):
+    def type(self) -> int:
         return proto.SUPLA_CHANNELTYPE_HUMIDITYSENSOR
 
     @property
-    def action_trigger_caps(self):
+    def action_trigger_caps(self) -> int:
         return 0
 
     @property
-    def default(self):
+    def default(self) -> int:
         return proto.SUPLA_CHANNELFNC_HUMIDITY
 
     @property
-    def flags(self):
+    def flags(self) -> int:
         return 0
 
-    def set_value(self, value):
+    def set_value(self, value: float) -> bool:
         self._value = value
         self.update()
         return True
 
     @property
-    def encoded_value(self):
+    def encoded_value(self) -> bytes:
         value = self._value
         if value is None:
             value = proto.SUPLA_HUMIDITY_NOT_AVAILABLE
@@ -162,7 +166,7 @@ class Humidity(Channel):
         humi_data = bytes(ctypes.c_int32(int(value * 1000)))
         return temp_data + humi_data
 
-    def set_encoded_value(self, value):
+    def set_encoded_value(self, value: bytes) -> bool:
         self._value = ctypes.c_int32.from_buffer_copy(value[4:8]).value / 1000
         if self._value == proto.SUPLA_HUMIDITY_NOT_AVAILABLE:
             self._value = None
@@ -171,45 +175,49 @@ class Humidity(Channel):
 
 
 class TemperatureAndHumidity(Channel):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._temperature = None
-        self._humidity = None
+        self._temperature: float | None = None
+        self._humidity: float | None = None
 
     @property
-    def temperature(self):
+    def temperature(self) -> float:
+        assert self._temperature is not None
         return self._temperature
 
     @property
-    def humidity(self):
+    def humidity(self) -> float:
+        assert self._humidity is not None
         return self._humidity
 
     @property
-    def type(self):
+    def type(self) -> int:
         return proto.SUPLA_CHANNELTYPE_HUMIDITYANDTEMPSENSOR
 
     @property
-    def action_trigger_caps(self):
+    def action_trigger_caps(self) -> int:
         return 0
 
     @property
-    def default(self):
+    def default(self) -> int:
         return proto.SUPLA_CHANNELFNC_HUMIDITYANDTEMPERATURE
 
     @property
-    def flags(self):
+    def flags(self) -> int:
         return 0
 
-    def set_temperature(self, value):
+    def set_temperature(self, value: float) -> bool:
         self._temperature = value
-        return self.update()
+        self.update()
+        return True
 
-    def set_humidity(self, value):
+    def set_humidity(self, value: float) -> bool:
         self._humidity = value
-        return self.update()
+        self.update()
+        return True
 
     @property
-    def encoded_value(self):
+    def encoded_value(self) -> bytes:
         temp = self._temperature
         humi = self._humidity
         if temp is None:
@@ -220,7 +228,7 @@ class TemperatureAndHumidity(Channel):
         humi_data = bytes(ctypes.c_int32(int(humi * 1000)))
         return temp_data + humi_data
 
-    def set_encoded_value(self, value):
+    def set_encoded_value(self, value: bytes) -> bool:
         self._temperature = ctypes.c_int32.from_buffer_copy(value[0:4]).value / 1000
         self._humidity = ctypes.c_int32.from_buffer_copy(value[4:8]).value / 1000
         if self._temperature == proto.SUPLA_TEMPERATURE_NOT_AVAILABLE:

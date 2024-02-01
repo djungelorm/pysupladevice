@@ -1,7 +1,7 @@
 import pytest
 
 from pysupladevice.channels import Temperature
-from pysupladevice.device import Device
+from pysupladevice.device import Device, DeviceState
 
 
 @pytest.fixture
@@ -14,15 +14,15 @@ def mock_channel(mocker):
     return mocker.patch("pysupladevice.channels.Temperature")
 
 
-def test_device(mock_socket, mock_channel):
-    def read():
+def test_device(mock_socket, mock_channel) -> None:
+    def read() -> bytes:
         # register successful message
         return (
             b"SUPLA\x10\x01\x00\x00\x00F\x00\x00\x00"
             b"\x07\x00\x00\x00\x03\x00\x00\x00x\x13\x01SUPLA"
         )
 
-    def write(data):
+    def write(data: bytes) -> None:
         print(data)
 
     mock_socket.return_value.read.side_effect = read
@@ -38,8 +38,8 @@ def test_device(mock_socket, mock_channel):
     channel = Temperature()
     device.add(channel)
 
-    assert device.state == device.State.CONNECTING
+    assert device.state == DeviceState.CONNECTING
     device.loop()
-    assert device.state == device.State.REGISTERING
+    assert device.state == DeviceState.REGISTERING  # type: ignore
     device.loop()
-    assert device.state == device.State.CONNECTED
+    assert device.state == DeviceState.CONNECTED

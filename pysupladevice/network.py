@@ -4,7 +4,7 @@ import ssl
 import time
 
 
-def connect_secure(address, port):
+def connect_secure(address: str, port: int) -> ssl.SSLSocket:
     context = ssl.create_default_context()
     context.check_hostname = False
     context.verify_mode = ssl.VerifyMode.CERT_NONE
@@ -14,7 +14,7 @@ def connect_secure(address, port):
     return ssock
 
 
-def connect(address, port):
+def connect(address: str, port: int) -> socket.socket:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(0.1)
     sock.connect((address, port))
@@ -26,19 +26,19 @@ class NetworkError(Exception):
 
 
 class Socket:
-    def __init__(self, server, port, secure):
+    def __init__(self, server: str, port: int, secure: bool):
         if secure:
-            self._socket = connect_secure(server, port)
+            self._socket: socket.socket = connect_secure(server, port)
         else:
             self._socket = connect(server, port)
         self._buffer = b""
         self._connect_time = time.time()
 
     @property
-    def connect_time(self):
+    def connect_time(self) -> float:
         return self._connect_time
 
-    def read(self):
+    def read(self) -> bytes:
         try:
             sockets = [self._socket]
             ready_to_read, _, _ = select.select(sockets, sockets, sockets, 0.1)
@@ -58,5 +58,5 @@ class Socket:
         except ssl.SSLZeroReturnError as exn:
             raise NetworkError(str(exn)) from exn
 
-    def write(self, data):
+    def write(self, data: bytes) -> None:
         self._socket.sendall(data)

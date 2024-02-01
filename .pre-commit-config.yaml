@@ -1,0 +1,69 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-yaml
+      - id: debug-statements
+      - id: destroyed-symlinks
+      - id: detect-aws-credentials
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: name-tests-test
+        exclude: ^tests/utils.py
+      - id: trailing-whitespace
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+        stages: [commit, push, manual]
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+        stages: [commit, push, manual]
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: env/bin/mypy
+        language: system
+        types: [python]
+        args: ["pysupladevice", "tests"]
+        files: "\\.py$"
+        pass_filenames: false
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: env/bin/pylint
+        language: system
+        types: [python]
+        args: [
+          "-rn", # Only display messages
+          "-sn", # Don't display the score
+        ]
+        files: "\\.py$"
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: env/bin/pytest
+        language: system
+        types: [python]
+        args: [
+          "--cov", "pysupladevice",
+          "--cov", "tests",
+          "--cov-fail-under=100",
+          "-n", "auto", # Run in parallel
+        ]
+        files: "\\.py$"
+        pass_filenames: false

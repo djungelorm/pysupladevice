@@ -1,14 +1,25 @@
-.PHONY: build test test-cov publish
+.PHONY: setup test dist coverage lint typecheck clean
 
-build:
-	poetry build
+setup: clean
+	DEB_PYTHON_INSTALL_LAYOUT="deb" virtualenv env
+	env/bin/pip install -e .[dev]
+	env/bin/pre-commit install
 
 test:
-	poetry run pytest -v
+	env/bin/pre-commit run --all-files
 
-test-cov:
-	poetry run pytest --cov --cov-report=html -v
+dist:
+	rm -rf dist
+	env/bin/python -m build --wheel
 
-publish:
-	poetry build
-	poetry publish
+coverage:
+	env/bin/pytest --cov pysupladevice --cov tests --cov-report=html:htmlcov
+
+lint:
+	env/bin/pre-commit run --all-files pylint
+
+typecheck:
+	env/bin/pre-commit run --all-files mypy
+
+clean:
+	rm -rf env build dist *.egg-info

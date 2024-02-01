@@ -1,31 +1,59 @@
-[tool.poetry]
-name = "pysupladevice"
-version = "0.1.5"
-description = ""
-license = "GPL-3.0-or-later"
-authors = ["djungelorm <djungelorm@users.noreply.github.com>"]
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.7"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.1"
-coverage = {extras = ["toml"], version = "^7.0.5"}
-pytest-cov = "^4.0.0"
-pytest-mock = "^3.10.0"
-black = "^22.12.0"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools", "setuptools_scm[toml]"]
+build-backend = "setuptools.build_meta"
 
-[tool.coverage.paths]
-source = ["pysupladevice", "*/site-packages"]
+[project]
+name = "pysupladevice"
+dynamic = ["version"]
+requires-python = ">=3.7"
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "mypy",
+    "pre-commit",
+    "pylint",
+    "pylint-pytest",
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+]
+
+[tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests"
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.main]
+load-plugins = [
+    "pylint.extensions.typing",
+    "pylint_pytest",
+]
+
+# [tool.pylint."messages control"]
+# disable = [
+#     "fixme",
+#     "missing-docstring",
+#     "too-many-locals",
+#     "too-many-nested-blocks",
+#     "too-many-branches",
+#     "too-many-statements",
+#     "duplicate-code",
+# ]
+
+# [tool.pylint.format]
+# good-names = "i,j,k,_,fs"
+
+[tool.pylint.reports]
+reports = "no"
 
 [tool.coverage.run]
 branch = true
-source = ["pysupladevice"]
 
-[tool.coverage.report]
-show_missing = true
+[tool.mypy]
+strict = true

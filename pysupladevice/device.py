@@ -2,20 +2,20 @@ import ctypes
 import time
 from enum import Enum
 
-from . import channels, network, proto
+from . import network, proto
 
 
 class DeviceError(Exception):
     pass
 
 
-class Device(object):
+class Device:  # pylint: disable=too-many-instance-attributes
     class State(Enum):
         CONNECTING = 1
         REGISTERING = 2
         CONNECTED = 3
 
-    def __init__(
+    def __init__(  # pylint:disable=too-many-arguments
         self,
         server,
         email,
@@ -46,6 +46,10 @@ class Device(object):
 
         self._ping_timeout = 15
         self._last_ping = 0
+
+    @property
+    def state(self):
+        return self._state
 
     def add(self, channel):
         channel_number = len(self._channels)
@@ -118,7 +122,7 @@ class Device(object):
             msg.channels[number].default = channel.default
             msg.channels[number].flags = channel.flags
             msg.channels[number].value = ctypes.c_uint64.from_buffer_copy(
-                channel._encoded_value
+                channel.encoded_value
             )
         size = ctypes.sizeof(msg) - (
             (proto.SUPLA_CHANNELMAXCOUNT - msg.channel_count)
@@ -246,7 +250,7 @@ class Device(object):
 
     def _handle_channel_state_request(self, rr_id, msg):
         if self._debug:
-            print(f"[{self._name}] <--- [{self._rr_id}] channel state request")
+            print(f"[{self._name}] <--- [{rr_id}] channel state request")
 
         now = time.time()
 
@@ -293,7 +297,7 @@ class Device(object):
 
         success = False
         if msg.channel_number < len(self._channels):
-            success = self._channels[msg.channel_number]._set_encoded_value(
+            success = self._channels[msg.channel_number].set_encoded_value(
                 bytes(ctypes.c_uint64(msg.value))
             )
 
@@ -311,7 +315,7 @@ class Device(object):
             print(f"[{self._name}] ---> [{self._rr_id}] channel new value result")
         self._send_packet(proto.SUPLA_DS_CALL_CHANNEL_SET_VALUE_RESULT, bytes(result))
 
-    def _set_value(self, channel_number, value):
+    def set_value(self, channel_number, value):
         if self._state == self.State.CONNECTED:
             msg = proto.TDS_SuplaDeviceChannelValue_C()
             msg.channel_number = channel_number

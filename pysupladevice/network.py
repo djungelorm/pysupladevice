@@ -25,7 +25,7 @@ class NetworkError(Exception):
     pass
 
 
-class Socket(object):
+class Socket:
     def __init__(self, server, port, secure):
         if secure:
             self._socket = connect_secure(server, port)
@@ -41,9 +41,7 @@ class Socket(object):
     def read(self):
         try:
             sockets = [self._socket]
-            ready_to_read, ready_to_write, in_error = select.select(
-                sockets, sockets, sockets, 0.1
-            )
+            ready_to_read, _, _ = select.select(sockets, sockets, sockets, 0.1)
             if len(ready_to_read) > 0:
                 data = self._socket.recv(2048)
                 if len(data) == 0:
@@ -54,11 +52,11 @@ class Socket(object):
             self._buffer = b""
             return result
         except BrokenPipeError as exn:
-            raise NetworkError(str(exn))
+            raise NetworkError(str(exn)) from exn
         except ConnectionResetError as exn:
-            raise NetworkError(str(exn))
+            raise NetworkError(str(exn)) from exn
         except ssl.SSLZeroReturnError as exn:
-            raise NetworkError(str(exn))
+            raise NetworkError(str(exn)) from exn
 
     def write(self, data):
         self._socket.sendall(data)

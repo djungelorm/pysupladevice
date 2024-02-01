@@ -35,19 +35,10 @@ load-plugins = [
     "pylint_pytest",
 ]
 
-# [tool.pylint."messages control"]
-# disable = [
-#     "fixme",
-#     "missing-docstring",
-#     "too-many-locals",
-#     "too-many-nested-blocks",
-#     "too-many-branches",
-#     "too-many-statements",
-#     "duplicate-code",
-# ]
-
-# [tool.pylint.format]
-# good-names = "i,j,k,_,fs"
+[tool.pylint."messages control"]
+disable = [
+    "missing-docstring",
+]
 
 [tool.pylint.reports]
 reports = "no"

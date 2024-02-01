@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name,too-few-public-methods
+
 import ctypes
 from enum import Enum
 

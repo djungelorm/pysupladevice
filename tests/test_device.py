@@ -17,7 +17,10 @@ def mock_channel(mocker):
 def test_device(mock_socket, mock_channel):
     def read():
         # register successful message
-        return b"SUPLA\x10\x01\x00\x00\x00F\x00\x00\x00\x07\x00\x00\x00\x03\x00\x00\x00x\x13\x01SUPLA"
+        return (
+            b"SUPLA\x10\x01\x00\x00\x00F\x00\x00\x00"
+            b"\x07\x00\x00\x00\x03\x00\x00\x00x\x13\x01SUPLA"
+        )
 
     def write(data):
         print(data)
@@ -35,8 +38,8 @@ def test_device(mock_socket, mock_channel):
     channel = Temperature()
     device.add(channel)
 
-    assert device._state == device.State.CONNECTING
+    assert device.state == device.State.CONNECTING
     device.loop()
-    assert device._state == device.State.REGISTERING
+    assert device.state == device.State.REGISTERING
     device.loop()
-    assert device._state == device.State.CONNECTED
+    assert device.state == device.State.CONNECTED

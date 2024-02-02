@@ -1,20 +1,23 @@
+from unittest.mock import Mock
+
 import pytest
+from pytest_mock import MockFixture
 
 from pysupladevice.channels import Temperature
 from pysupladevice.device import Device, DeviceState
 
 
 @pytest.fixture
-def mock_socket(mocker):
+def mock_socket(mocker: MockFixture) -> Mock:
     return mocker.patch("pysupladevice.network.Socket")
 
 
 @pytest.fixture
-def mock_channel(mocker):
+def mock_channel(mocker: MockFixture) -> Mock:
     return mocker.patch("pysupladevice.channels.Temperature")
 
 
-def test_device(mock_socket, mock_channel) -> None:
+def test_device(mock_socket: Mock, mock_channel: Mock) -> None:
     def read() -> bytes:
         # register successful message
         return (

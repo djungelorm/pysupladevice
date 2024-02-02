@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import ctypes
 import time
+from collections.abc import Callable
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from pysupladevice import network, proto
 
@@ -221,7 +222,7 @@ class Device:  # pylint: disable=too-many-instance-attributes
         packet_data = data[: -len(proto.TAG)]
         packet_data = packet_data.ljust(ctypes.sizeof(proto.TSuplaDataPacket), b"\x00")
         packet = proto.TSuplaDataPacket.from_buffer_copy(packet_data)
-        handlers = {
+        handlers: dict[int, tuple[Any, Callable[[int, Any], None]]] = {
             proto.SUPLA_SD_CALL_REGISTER_DEVICE_RESULT: (
                 proto.TSD_SuplaRegisterDeviceResult,
                 self._handle_register_result,

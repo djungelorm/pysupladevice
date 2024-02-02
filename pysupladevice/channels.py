@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 import ctypes
+from collections.abc import Callable
+from typing import Any
 
 from pysupladevice import proto
 from pysupladevice.device import Device
@@ -19,12 +23,32 @@ class Channel:  # pylint: disable=too-few-public-methods
             self._device.set_value(self._channel_number, self.encoded_value)
 
     @property
+    def type(self) -> int:
+        raise NotImplementedError
+
+    @property
+    def action_trigger_caps(self) -> int:
+        raise NotImplementedError
+
+    @property
+    def default(self) -> Any:
+        raise NotImplementedError
+
+    @property
+    def flags(self) -> int:
+        raise NotImplementedError
+
+    @property
     def encoded_value(self) -> bytes:
         raise NotImplementedError
 
 
 class Relay(Channel):
-    def __init__(self, default: bool = False, on_change=None):
+    def __init__(
+        self,
+        default: bool = False,
+        on_change: Callable[[Relay, bool], None] | None = None,
+    ):
         super().__init__()
         self._default = default
         self._value = default
@@ -84,8 +108,7 @@ class Temperature(Channel):
         self._value: float | None = None
 
     @property
-    def value(self) -> float:
-        assert self._value is not None
+    def value(self) -> float | None:
         return self._value
 
     @property
@@ -130,8 +153,7 @@ class Humidity(Channel):
         self._value: float | None = None
 
     @property
-    def value(self) -> float:
-        assert self._value is not None
+    def value(self) -> float | None:
         return self._value
 
     @property
@@ -181,13 +203,11 @@ class TemperatureAndHumidity(Channel):
         self._humidity: float | None = None
 
     @property
-    def temperature(self) -> float:
-        assert self._temperature is not None
+    def temperature(self) -> float | None:
         return self._temperature
 
     @property
-    def humidity(self) -> float:
-        assert self._humidity is not None
+    def humidity(self) -> float | None:
         return self._humidity
 
     @property

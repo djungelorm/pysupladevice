@@ -10,6 +10,7 @@ test:
 
 dist:
 	rm -rf dist
+	env/bin/python -m build
 	env/bin/python -m build --wheel
 
 coverage:

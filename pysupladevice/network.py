@@ -35,6 +35,10 @@ class Socket:
         self._connect_time = time.time()
 
     @property
+    def socket(self) -> socket.socket:
+        return self._socket
+
+    @property
     def connect_time(self) -> float:
         return self._connect_time
 

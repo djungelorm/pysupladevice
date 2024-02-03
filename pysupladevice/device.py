@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ctypes
+import socket
 import time
 from collections.abc import Callable
 from enum import Enum
@@ -73,6 +74,10 @@ class Device:  # pylint: disable=too-many-instance-attributes
     def connect(self) -> None:
         while self._state != DeviceState.CONNECTED:
             self.loop()
+
+    @property
+    def socket(self) -> socket.socket:
+        return self._socket.socket
 
     def loop_forever(self) -> None:
         while True:

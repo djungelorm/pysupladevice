@@ -24,23 +24,23 @@ class Channel:  # pylint: disable=too-few-public-methods
 
     @property
     def type(self) -> int:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def action_trigger_caps(self) -> int:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def default(self) -> Any:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def flags(self) -> int:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def encoded_value(self) -> bytes:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class Relay(Channel):

@@ -21,6 +21,7 @@ def test_relay() -> None:
     assert not channel.value
 
     assert channel.type == proto.SUPLA_CHANNELTYPE_RELAY
+    # pylint: disable=duplicate-code
     assert channel.action_trigger_caps == (
         proto.SUPLA_ACTION_CAP_TURN_ON
         | proto.SUPLA_ACTION_CAP_TURN_OFF
@@ -95,6 +96,11 @@ def test_temperature_not_available() -> None:
     assert channel.value is None
     assert channel.encoded_value == b"\x00\x00\x00\x00\x00\x30\x71\xc0"
 
+    channel.set_value(42)
+    assert channel.value is not None
+    assert channel.set_encoded_value(b"\x00\x00\x00\x00\x00\x30\x71\xc0")
+    assert channel.value is None
+
 
 def test_humidity() -> None:
     channel = channels.Humidity()
@@ -117,6 +123,11 @@ def test_humidity_not_available() -> None:
     channel = channels.Humidity()
     assert channel.value is None
     assert channel.encoded_value == b"\xc8\xcd\xfb\xff\x18\xfc\xff\xff"
+
+    channel.set_value(42)
+    assert channel.value is not None
+    assert channel.set_encoded_value(b"\xc8\xcd\xfb\xff\x18\xfc\xff\xff")
+    assert channel.value is None
 
 
 def test_temperature_and_humidity() -> None:
@@ -144,3 +155,11 @@ def test_temperature_and_humidity_not_available() -> None:
     assert channel.temperature is None
     assert channel.humidity is None
     assert channel.encoded_value == b"\xc8\xcd\xfb\xff\x18\xfc\xff\xff"
+
+    channel.set_temperature(42)
+    channel.set_humidity(42)
+    assert channel.temperature is not None
+    assert channel.humidity is not None
+    assert channel.set_encoded_value(b"\xc8\xcd\xfb\xff\x18\xfc\xff\xff")
+    assert channel.temperature is None
+    assert channel.humidity is None

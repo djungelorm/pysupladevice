@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 from pysupladevice import network, proto
 
 if TYPE_CHECKING:
-    from pysupladevice.channels import Channel
+    from pysupladevice.channels import Channel  # pragma: no cover
 
 
 class DeviceError(Exception):

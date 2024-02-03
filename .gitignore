@@ -1,5 +1,6 @@
 htmlcov
 dist
+build
 __pycache__
 .coverage
 *.egg-info

@@ -4,7 +4,7 @@ import pytest
 from pytest_mock import MockFixture
 
 from pysupladevice.channels import Temperature
-from pysupladevice.device import Device, DeviceState
+from pysupladevice.device import Device, DeviceError, DeviceState
 
 
 @pytest.fixture
@@ -36,7 +36,6 @@ def test_device(mock_socket: Mock, mock_channel: Mock) -> None:
         "email@example.com",
         b"\xaa\x48\xb2\x76\x63\x0a\x3f\xd7\x1a\xdc\xca\xfc\xf0\x08\x9d\xf2",
         b"\x8b\x3f\x59\xf2\x97\xc6\x07\x4f\x1e\xc9\x8a\x25\xce\x14\x78\x5f",
-        debug=True,
     )
     channel = Temperature()
     device.add(channel)
@@ -46,3 +45,15 @@ def test_device(mock_socket: Mock, mock_channel: Mock) -> None:
     assert device.state == DeviceState.REGISTERING  # type: ignore
     device.loop()
     assert device.state == DeviceState.CONNECTED
+
+
+def test_device_with_no_channels(mock_socket: Mock, mock_channel: Mock) -> None:
+    device = Device(
+        "supla.example.com",
+        "email@example.com",
+        b"\xaa\x48\xb2\x76\x63\x0a\x3f\xd7\x1a\xdc\xca\xfc\xf0\x08\x9d\xf2",
+        b"\x8b\x3f\x59\xf2\x97\xc6\x07\x4f\x1e\xc9\x8a\x25\xce\x14\x78\x5f",
+    )
+    assert device.state == DeviceState.CONNECTING
+    with pytest.raises(DeviceError):
+        device.loop()

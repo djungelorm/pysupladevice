@@ -80,7 +80,7 @@ class Device:  # pylint: disable=too-many-instance-attributes
         return self._socket.socket
 
     def loop_forever(self) -> None:
-        while True:
+        while True:  # pragma: no cover
             self.loop()
 
     def loop(self) -> None:

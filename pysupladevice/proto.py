@@ -217,6 +217,9 @@ class TDS_SuplaDeviceChannelValue_C(ctypes.Structure):
     ]
 
 
+MAX_PACKET_DATA_SIZE = ctypes.sizeof(TDS_SuplaRegisterDevice_E)
+
+
 class TSuplaDataPacket(ctypes.Structure):
     _pack_ = 1
     _fields_ = [
@@ -225,9 +228,5 @@ class TSuplaDataPacket(ctypes.Structure):
         ("rr_id", ctypes.c_uint32),
         ("call_id", ctypes.c_uint32),
         ("data_size", ctypes.c_uint32),
-        (
-            "data",
-            ctypes.c_byte
-            * (ctypes.sizeof(TDS_SuplaDeviceChannel_C) * SUPLA_CHANNELMAXCOUNT),
-        ),
+        ("data", ctypes.c_byte * MAX_PACKET_DATA_SIZE),
     ]

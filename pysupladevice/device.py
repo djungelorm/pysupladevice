@@ -187,8 +187,8 @@ class Device:  # pylint: disable=too-many-instance-attributes
         #    return PACKET_AVAILABLE and its size
         #  - if there is a valid partial packet at the start of the buffer return INCOMPLETE
         size = len(self._recv_buffer)
-        packet_header_size = ctypes.sizeof(proto.TSuplaDataPacket) - (
-            ctypes.sizeof(proto.TDS_SuplaDeviceChannel_C) * proto.SUPLA_CHANNELMAXCOUNT
+        packet_header_size = (
+            ctypes.sizeof(proto.TSuplaDataPacket) - proto.MAX_PACKET_DATA_SIZE
         )
 
         # check we have enough bytes for a minimally sized packet, followed by end tag

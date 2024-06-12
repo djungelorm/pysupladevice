@@ -233,7 +233,7 @@ class Device:  # pylint: disable=too-many-instance-attributes
                 self._handle_register_result,
             ),
             proto.SUPLA_CSD_CALL_GET_CHANNEL_STATE: (
-                proto.TCSD_ChannelStateRequest,
+                proto.TCSD_SuplaChannelStateRequest,
                 self._handle_channel_state_request,
             ),
             proto.SUPLA_SDC_CALL_PING_SERVER_RESULT: (
@@ -265,14 +265,14 @@ class Device:  # pylint: disable=too-many-instance-attributes
         self._state = DeviceState.CONNECTED
 
     def _handle_channel_state_request(
-        self, rr_id: int, msg: proto.TCSD_ChannelStateRequest
+        self, rr_id: int, msg: proto.TCSD_SuplaChannelStateRequest
     ) -> None:
         if self._debug:
             print(f"[{self._name}] <--- [{rr_id}] channel state request")
 
         now = time.time()
 
-        result = proto.TDSC_ChannelState()
+        result = proto.TDSC_SuplaChannelState()
         result.receiver_id = msg.sender_id
         result.channel_number = msg.channel_number
         result.padding[:] = b"\x00\x00\x00"

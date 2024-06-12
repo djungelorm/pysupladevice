@@ -139,7 +139,7 @@ class TSD_SuplaRegisterDeviceResult(ctypes.Structure):
     ]
 
 
-class TCSD_ChannelStateRequest(ctypes.Structure):
+class TCSD_SuplaChannelStateRequest(ctypes.Structure):
     _pack_ = 1
     _fields_ = [
         ("sender_id", ctypes.c_int32),
@@ -148,7 +148,7 @@ class TCSD_ChannelStateRequest(ctypes.Structure):
     ]
 
 
-class TDSC_ChannelState(ctypes.Structure):
+class TDSC_SuplaChannelState(ctypes.Structure):
     _pack_ = 1
     _fields_ = [
         ("receiver_id", ctypes.c_int32),

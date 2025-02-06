@@ -1,3 +1,6 @@
+This project is no longer maintained. See https://github.com/djungelorm/suplalite for its successor.
+====================================================================================================
+
 Python SUPLA device library
 ===========================
 
